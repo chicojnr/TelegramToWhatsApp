@@ -12,6 +12,6 @@
   "dependencies": {
     "node-telegram-bot-api": "^0.61.0",
     "npm-check-updates": "^16.10.17",
-    "venom-bot": "^5.0.13"
+    "venom-bot": "^4.3.7"
   }
 }
