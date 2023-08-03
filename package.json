@@ -1,0 +1,17 @@
+{
+  "name": "telegramtowhatsapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.61.0",
+    "npm-check-updates": "^16.10.17",
+    "venom-bot": "^5.0.13"
+  }
+}
