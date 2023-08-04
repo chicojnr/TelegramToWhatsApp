@@ -1,67 +1,113 @@
-const venom = require('venom-bot');
-const express = require('express');
-const app = express();
+// Done This To Fix IT !!!
+const repl = require('repl');
+const qrcode = require('qrcode-terminal');
 
-let client; // Definir a variável 'client' no escopo global
+const { Client, LocalAuth } = require('whatsapp-web.js');
 
-venom.create({
-  session: 'mySessionName',
-  number: '+17813431064',
-  sessionFile: './mySessionName.json',
-  puppeteerOptions: {
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu',
-    ],
-  },
-}).then((waClient) => {
-  console.log('Cliente conectado');
-  client = waClient;
-  // Resto do código...
-}).catch((error) => {
-  console.error(error);
+const client = new Client({
+  puppeteer: { headless: true },
+  authStrategy: new LocalAuth()
 });
 
-// Rota para enviar mensagem pelo WhatsApp
-app.get('/enviar-mensagem', (req, res) => {
-  const numeroDestino = '5587991596395@c.us';
-  const mensagem = req.query.mensagem;
+console.log('Initializing...');
 
-  if (!numeroDestino || !mensagem) {
-    return res.status(400).send('Parâmetros inválidos. Você precisa fornecer "numeroDestino" e "mensagem" na URL.');
+client.initialize();
+
+client.on('qr', qr => {
+  qrcode.generate(qr, { small: true });
+});
+
+client.on('qr', () => {
+  console.log('Please scan the QR code.');
+});
+
+client.on('ready', () => {
+  console.log('Client is ready!');
+});
+
+client.on('ready', () => {
+  const shell = repl.start('wwebjs> ');
+  shell.context.client = client;
+  shell.on('exit', async () => {
+    await client.destroy();
+  });
+});
+
+client.on('message', message => {
+  console.log(message.body);
+});
+
+client.on('message', message => {
+  if (message.body === '!ping') {
+    message.reply('pong');
   }
-
-  enviarMensagem(client, numeroDestino, mensagem); // Passar a variável 'client' como parâmetro
-  res.send('Mensagem enviada com sucesso!');
 });
 
-// Função para enviar a mensagem
-async function enviarMensagem(client, numeroDestino, mensagem) { // Receber 'client' como parâmetro
-  try {
-    if (!client || !client.isConnected()) {
-      throw new Error('Cliente do WhatsApp ainda não está conectado. Aguarde a conexão.');
-    }
 
-    // Envia a mensagem para o número de destino
-    await client.sendText(numeroDestino, mensagem);
+// const venom = require('venom-bot');
+// const express = require('express');
+// const app = express();
 
-    console.log(`Mensagem enviada via WhatsApp para ${numeroDestino}: ${mensagem}`);
-  } catch (error) {
-    console.error('Erro ao enviar mensagem via WhatsApp:', error);
-  }
-}
+// let client; // Definir a variável 'client' no escopo global
 
-// Iniciar o servidor Express
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}`);
-});
+// venom.create({
+//   session: 'mySessionName',
+//   number: '+17813431064',
+//   sessionFile: './mySessionName.json',
+//   puppeteerOptions: {
+//     args: [
+//       '--no-sandbox',
+//       '--disable-setuid-sandbox',
+//       '--disable-dev-shm-usage',
+//       '--disable-accelerated-2d-canvas',
+//       '--no-first-run',
+//       '--no-zygote',
+//       '--single-process',
+//       '--disable-gpu',
+//     ],
+//   },
+// }).then((waClient) => {
+//   console.log('Cliente conectado');
+//   client = waClient;
+//   // Resto do código...
+// }).catch((error) => {
+//   console.error(error);
+// });
+
+// // Rota para enviar mensagem pelo WhatsApp
+// app.get('/enviar-mensagem', (req, res) => {
+//   const numeroDestino = '5587991596395@c.us';
+//   const mensagem = req.query.mensagem;
+
+//   if (!numeroDestino || !mensagem) {
+//     return res.status(400).send('Parâmetros inválidos. Você precisa fornecer "numeroDestino" e "mensagem" na URL.');
+//   }
+
+//   enviarMensagem(client, numeroDestino, mensagem); // Passar a variável 'client' como parâmetro
+//   res.send('Mensagem enviada com sucesso!');
+// });
+
+// // Função para enviar a mensagem
+// async function enviarMensagem(client, numeroDestino, mensagem) { // Receber 'client' como parâmetro
+//   try {
+//     if (!client || !client.isConnected()) {
+//       throw new Error('Cliente do WhatsApp ainda não está conectado. Aguarde a conexão.');
+//     }
+
+//     // Envia a mensagem para o número de destino
+//     await client.sendText(numeroDestino, mensagem);
+
+//     console.log(`Mensagem enviada via WhatsApp para ${numeroDestino}: ${mensagem}`);
+//   } catch (error) {
+//     console.error('Erro ao enviar mensagem via WhatsApp:', error);
+//   }
+// }
+
+// // Iniciar o servidor Express
+// const port = 3000;
+// app.listen(port, () => {
+//   console.log(`Servidor iniciado na porta ${port}`);
+// });
 
 
 // const venom = require('venom-bot');
